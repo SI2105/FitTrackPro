@@ -2,6 +2,7 @@ import express from 'express';
 import { errorHandler } from './middlewares/errorHandler';
 import authRoutes from './routes/authRoutes';
 
+import exerciseRoutes from './routes/exerciseRoutes'
 const app = express();
 
 app.use(express.json());
@@ -10,6 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/', authRoutes);
+app.use('/api/v1/exercises', exerciseRoutes);
 
 // Global error handler (should be after routes)
 app.use(errorHandler);
