@@ -14,6 +14,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ExerciseCategory {
+  strength
+  aerobic
+  flexibility
+}
+
+enum MuscleGroup {
+  chest
+  back
+  legs
+  arms
+  shoulders
+  core
+  glutes
+}
+
 model User {
   id        Int       @id @default(autoincrement())
   email     String    @unique
@@ -26,12 +42,11 @@ model User {
 }
 
 model Exercise {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
-  description String
-  category    String
-  muscleGroup String
-
+  id             Int               @id @default(autoincrement())
+  name           String            @unique
+  description    String
+  category       ExerciseCategory
+  muscleGroups   MuscleGroup[]
   workoutExercises WorkoutExercise[]
 }
 
@@ -52,14 +67,21 @@ model WorkoutExercise {
   id         Int       @id @default(autoincrement())
   workoutId  Int
   exerciseId Int
-  sets       Int
-  reps       Int
-  weight     Float
+   // Fields specific to strength/flexibility
+  sets           Int?
+  reps           Int?
+  // Field specific to strength
+  weight         Float?
+
+  // Fields specific to aerobic
+  duration       Int?              // in seconds
+  distance       Float?            // in kilometers/miles
+
   comment    String?
 
   workout    Workout   @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   exercise   Exercise  @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
-  @@unique([workoutId, exerciseId]) // Prevent duplicate pair
+  @@unique([workoutId, exerciseId])
 }
 
