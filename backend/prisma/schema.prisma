@@ -67,21 +67,39 @@ model WorkoutExercise {
   id         Int       @id @default(autoincrement())
   workoutId  Int
   exerciseId Int
-   // Fields specific to strength/flexibility
-  sets           Int?
-  reps           Int?
-  // Field specific to strength
-  weight         Float?
-
-  // Fields specific to aerobic
-  duration       Int?              // in seconds
-  distance       Float?            // in kilometers/miles
-
   comment    String?
+
+  
+  strength   StrengthWorkoutExercise?
+  aerobic    AerobicWorkoutExercise?
+  flexibility FlexibilityWorkoutExercise?
 
   workout    Workout   @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   exercise   Exercise  @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@unique([workoutId, exerciseId])
 }
+model StrengthWorkoutExercise {
+  id        Int      @id
+  sets      Int
+  reps      Int
+  weight    Float
 
+  base      WorkoutExercise @relation(fields: [id], references: [id], onDelete: Cascade)
+}
+
+model FlexibilityWorkoutExercise {
+  id    Int @id
+  sets  Int
+  reps  Int
+
+  base  WorkoutExercise @relation(fields: [id], references: [id], onDelete: Cascade)
+}
+
+model AerobicWorkoutExercise {
+  id       Int @id
+  duration Int   // seconds
+  distance Float // km/miles
+
+  base     WorkoutExercise @relation(fields: [id], references: [id], onDelete: Cascade)
+}

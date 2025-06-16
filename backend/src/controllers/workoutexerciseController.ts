@@ -3,6 +3,7 @@ import { PrismaClient, ExerciseCategory } from "../../generated/prisma";
 
 const prisma = new PrismaClient();
 
+// POST /workoutsexercises/:workoutId/exercises
 export const createWorkoutExercise = async (
   req: Request,
   res: Response,
@@ -20,26 +21,13 @@ export const createWorkoutExercise = async (
       comment,
     } = req.body;
 
-    const existingAssociation = await prisma.workoutExercise.findFirst({
-      where: {
-        workoutId: parseInt(workoutId),
-        exerciseId,
-      },
-    });
-
-    if (existingAssociation) {
-      res.status(400).json({ message: "This exercise is already in the specified workout. You can remove or edit it, alternatively choose another exercise" });
-      return;
-    }
-
-    const user_id = req.user_id
     const workout = await prisma.workout.findUnique({
       where: { id: parseInt(workoutId) },
     });
 
-    if (!workout || workout.userId !== user_id) {
+    if (!workout || workout.userId !== req.user_id) {
       res.status(403).json({ message: "Unauthorized or workout not found" });
-      return 
+      return;
     }
 
     const exercise = await prisma.exercise.findUnique({
@@ -51,34 +39,32 @@ export const createWorkoutExercise = async (
       return;
     }
 
-    const { category } = exercise;
+    // Check duplicate
+    const existing = await prisma.workoutExercise.findUnique({
+      where: { workoutId_exerciseId: { workoutId: parseInt(workoutId), exerciseId } },
+    });
+
+    if (existing) {
+      res.status(400).json({
+        message: "This exercise is already in the workout. Edit or remove it instead.",
+      });
+      return;
+    }
+
+    // Validate based on category
     const errors: string[] = [];
 
-    // Inline validation depending on exercise category
-    if (category === ExerciseCategory.strength) {
+    if (exercise.category === ExerciseCategory.strength) {
       if (sets == null || reps == null || weight == null) {
         errors.push("Strength exercises must include sets, reps, and weight.");
       }
-      if (duration != null || distance != null) {
-        errors.push("Strength exercises should not include duration or distance.");
-      }
-    }
-
-    if (category === ExerciseCategory.aerobic) {
+    } else if (exercise.category === ExerciseCategory.aerobic) {
       if (duration == null && distance == null) {
-        errors.push("Aerobic exercises must include at least duration or distance.");
+        errors.push("Aerobic exercises must include duration or distance.");
       }
-      if (sets != null || reps != null || weight != null) {
-        errors.push("Aerobic exercises should not include sets, reps, or weight.");
-      }
-    }
-
-    if (category === ExerciseCategory.flexibility) {
+    } else if (exercise.category === ExerciseCategory.flexibility) {
       if (sets == null || reps == null) {
         errors.push("Flexibility exercises must include sets and reps.");
-      }
-      if (weight != null || duration != null || distance != null) {
-        errors.push("Flexibility exercises should not include weight, duration, or distance.");
       }
     }
 
@@ -87,20 +73,48 @@ export const createWorkoutExercise = async (
       return;
     }
 
-    const newWorkoutExercise = await prisma.workoutExercise.create({
+    // Create base WorkoutExercise first
+    const base = await prisma.workoutExercise.create({
       data: {
         workoutId: parseInt(workoutId),
         exerciseId,
-        sets,
-        reps,
-        weight,
-        duration,
-        distance,
         comment,
       },
     });
 
-    res.status(201).json(newWorkoutExercise);
+    // Then create the subtype
+    switch (exercise.category) {
+      case ExerciseCategory.strength:
+        await prisma.strengthWorkoutExercise.create({
+          data: {
+            id: base.id,
+            sets,
+            reps,
+            weight,
+          },
+        });
+        break;
+      case ExerciseCategory.flexibility:
+        await prisma.flexibilityWorkoutExercise.create({
+          data: {
+            id: base.id,
+            sets,
+            reps,
+          },
+        });
+        break;
+      case ExerciseCategory.aerobic:
+        await prisma.aerobicWorkoutExercise.create({
+          data: {
+            id: base.id,
+            duration: duration ?? 0,
+            distance: distance ?? 0,
+          },
+        });
+        break;
+    }
+
+    res.status(201).json({ ...base, category: exercise.category });
   } catch (error) {
     next(error);
   }
@@ -114,9 +128,7 @@ export const updateWorkoutExercise = async (
 ) => {
   try {
     const { workoutId, id } = req.params;
-    const userId = req.user_id
     const {
-      exerciseId,
       sets,
       reps,
       weight,
@@ -129,48 +141,35 @@ export const updateWorkoutExercise = async (
       where: { id: parseInt(workoutId) },
     });
 
-    if (!workout || workout.userId !== userId) {
+    if (!workout || workout.userId !== req.user_id) {
       res.status(403).json({ message: "Unauthorized or workout not found" });
       return;
     }
 
-    const exercise = await prisma.exercise.findUnique({
-      where: { id: exerciseId },
+    const base = await prisma.workoutExercise.findUnique({
+      where: { id: parseInt(id) },
+      include: { exercise: true },
     });
 
-    if (!exercise) {
-      res.status(404).json({ message: "Exercise not found" });
+    if (!base) {
+      res.status(404).json({ message: "WorkoutExercise not found" });
       return;
     }
 
-
-    const { category } = exercise;
+    const { category } = base.exercise;
     const errors: string[] = [];
 
     if (category === ExerciseCategory.strength) {
       if (sets == null || reps == null || weight == null) {
         errors.push("Strength exercises must include sets, reps, and weight.");
       }
-      if (duration != null || distance != null) {
-        errors.push("Strength exercises should not include duration or distance.");
-      }
-    }
-
-    if (category === ExerciseCategory.aerobic) {
+    } else if (category === ExerciseCategory.aerobic) {
       if (duration == null && distance == null) {
-        errors.push("Aerobic exercises must include at least duration or distance.");
+        errors.push("Aerobic exercises must include duration or distance.");
       }
-      if (sets != null || reps != null || weight != null) {
-        errors.push("Aerobic exercises should not include sets, reps, or weight.");
-      }
-    }
-
-    if (category === ExerciseCategory.flexibility) {
+    } else if (category === ExerciseCategory.flexibility) {
       if (sets == null || reps == null) {
         errors.push("Flexibility exercises must include sets and reps.");
-      }
-      if (weight != null || duration != null || distance != null) {
-        errors.push("Flexibility exercises should not include weight, duration, or distance.");
       }
     }
 
@@ -179,25 +178,38 @@ export const updateWorkoutExercise = async (
       return;
     }
 
-    const updatedExercise = await prisma.workoutExercise.update({
+    // Update base
+    await prisma.workoutExercise.update({
       where: { id: parseInt(id) },
-      data: {
-        workoutId: parseInt(workoutId),
-        exerciseId,
-        sets,
-        reps,
-        weight,
-        duration,
-        distance,
-        comment,}
+      data: { comment },
     });
 
-    res.status(200).json(updatedExercise);
+    // Update subtype
+    if (category === ExerciseCategory.strength) {
+      await prisma.strengthWorkoutExercise.update({
+        where: { id: parseInt(id) },
+        data: { sets, reps, weight },
+      });
+    } else if (category === ExerciseCategory.flexibility) {
+      await prisma.flexibilityWorkoutExercise.update({
+        where: { id: parseInt(id) },
+        data: { sets, reps },
+      });
+    } else if (category === ExerciseCategory.aerobic) {
+      await prisma.aerobicWorkoutExercise.update({
+        where: { id: parseInt(id) },
+        data: {
+          duration: duration ?? 0,
+          distance: distance ?? 0,
+        },
+      });
+    }
+
+    res.status(200).json({ message: "WorkoutExercise updated." });
   } catch (error) {
     next(error);
   }
 };
-
 
 // DELETE /workouts/:workoutId/exercises/:id
 export const deleteWorkoutExercise = async (
@@ -207,13 +219,12 @@ export const deleteWorkoutExercise = async (
 ) => {
   try {
     const { workoutId, id } = req.params;
-    const userId = req.user_id;
 
     const workout = await prisma.workout.findUnique({
       where: { id: parseInt(workoutId) },
     });
 
-    if (!workout || workout.userId !== userId) {
+    if (!workout || workout.userId !== req.user_id) {
       res.status(403).json({ message: "Unauthorized or workout not found" });
       return;
     }
@@ -228,7 +239,6 @@ export const deleteWorkoutExercise = async (
   }
 };
 
-
 // GET /workouts/:workoutId/exercises
 export const getWorkoutExercises = async (
   req: Request,
@@ -237,25 +247,63 @@ export const getWorkoutExercises = async (
 ) => {
   try {
     const { workoutId } = req.params;
-    const userId = req.user_id;
 
     const workout = await prisma.workout.findUnique({
       where: { id: parseInt(workoutId) },
     });
 
-    if (!workout || workout.userId !== userId) {
+    if (!workout || workout.userId !== req.user_id) {
       res.status(403).json({ message: "Unauthorized or workout not found" });
       return;
     }
 
-    const exercises = await prisma.workoutExercise.findMany({
+    const workoutExercises = await prisma.workoutExercise.findMany({
       where: { workoutId: parseInt(workoutId) },
-      include: { exercise: true },
+      include: {
+        exercise: true,
+        strength: true,
+        aerobic: true,
+        flexibility: true,
+      },
     });
 
-    res.status(200).json(exercises);
+    const simplified = workoutExercises.map((we) => {
+      let details: Record<string, unknown> = {
+        id: we.id,
+        comment: we.comment,
+        exercise: {
+          id: we.exercise.id,
+          name: we.exercise.name,
+          category: we.exercise.category,
+        },
+      };
+
+      if (we.strength) {
+        details = {
+          ...details,
+          sets: we.strength.sets,
+          reps: we.strength.reps,
+          weight: we.strength.weight,
+        };
+      } else if (we.aerobic) {
+        details = {
+          ...details,
+          duration: we.aerobic.duration,
+          distance: we.aerobic.distance,
+        };
+      } else if (we.flexibility) {
+        details = {
+          ...details,
+          sets: we.flexibility.sets,
+          reps: we.flexibility.reps,
+        };
+      }
+
+      return details;
+    });
+
+    res.status(200).json(simplified);
   } catch (error) {
     next(error);
   }
 };
-
