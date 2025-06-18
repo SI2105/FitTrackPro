@@ -114,7 +114,12 @@ export const updateWorkout = async (req: Request, res: Response, next: NextFunct
         const userId = req.user_id;
         const { name, notes, scheduledAt } = req.body;
 
-        const workout = await prisma.workout.updateMany({
+        if (!name && !notes && !scheduledAt){
+            res.status(400).json({message: "Empty Update Error: At least one field should be included in update"})
+            return;
+        }
+
+        const workout = await prisma.workout.updateManyAndReturn({
             where: {
                 id: workoutId,
                 userId,
@@ -126,12 +131,12 @@ export const updateWorkout = async (req: Request, res: Response, next: NextFunct
             },
         });
 
-        if (workout.count === 0) {
+        if (workout.length === 0) {
             res.status(404).json({ message: "Workout not found or does not belong to user" });
             return;
         }
 
-        res.status(200).json({ message: "Workout updated" });
+        res.status(200).json(workout[0]);
     } catch (error) {
         next(error);
     }

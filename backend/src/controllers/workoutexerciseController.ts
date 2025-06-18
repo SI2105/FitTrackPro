@@ -3,7 +3,7 @@ import { PrismaClient, ExerciseCategory } from "../../generated/prisma";
 
 const prisma = new PrismaClient();
 
-// POST /workoutsexercises/:workoutId/exercises
+
 export const createWorkoutExercise = async (
   req: Request,
   res: Response,
@@ -120,7 +120,7 @@ export const createWorkoutExercise = async (
   }
 };
 
-// PUT /workouts/:workoutId/exercises/:id
+
 export const updateWorkoutExercise = async (
   req: Request,
   res: Response,
@@ -211,7 +211,7 @@ export const updateWorkoutExercise = async (
   }
 };
 
-// DELETE /workouts/:workoutId/exercises/:id
+
 export const deleteWorkoutExercise = async (
   req: Request,
   res: Response,
@@ -239,7 +239,6 @@ export const deleteWorkoutExercise = async (
   }
 };
 
-// GET /workouts/:workoutId/exercises
 export const getWorkoutExercises = async (
   req: Request,
   res: Response,

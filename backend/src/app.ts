@@ -12,7 +12,7 @@ app.use(express.json());
 //Ensures API can take x-www-form-urlencoded requests
 app.use(express.urlencoded({ extended: true }));
 // Routes
-app.use('/api/', authRoutes);
+app.use('/api/v1', authRoutes);
 app.use('/api/v1/exercises', exerciseRoutes);
 app.use('/api/v1/workouts', workoutRoutes);
 app.use('/api/v1/workoutexercises', workoutexerciseRoutes)
