@@ -57,6 +57,12 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+
+  await prisma.workoutExercise.deleteMany();
+  await prisma.workout.deleteMany();
+  await prisma.exercise.deleteMany();
+  await prisma.user.deleteMany();
+  
   await prisma.$disconnect();
 });
 

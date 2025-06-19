@@ -25,6 +25,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+
+  
   await prisma.$disconnect();
 });
 

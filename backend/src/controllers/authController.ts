@@ -13,6 +13,22 @@ export const registerUser = async (
     try{
         const {email,name, password} = req.body;
         
+        if(!email || !name || !password ){
+          res.status(400).json({"message":"Email, Name or Password fields are missing"});
+          return;
+        }
+
+        const existing = await prisma.user.findFirst({
+          where: {
+            email: email,
+          }
+        });
+
+        if(existing){
+          res.status(409).json({"message": "Account with this email already exists" })
+          // or 409 if you handle duplicate error explicitly
+          return;
+        }
         const hashedPassword = await bcrypt.hash(password, 10)
         await prisma.user.create({
             data: {
@@ -36,6 +52,10 @@ export const loginUser = async (
 ) => {
   try {
     const {email, password} = req.body;
+    if(!email || !password ){
+          res.status(400).json({"message":"Email or Password fields are missing"});
+          return;
+        }
     
     const user = await prisma.user.findUnique({
         where: {

@@ -5,10 +5,13 @@ import authRoutes from './routes/authRoutes';
 import exerciseRoutes from './routes/exerciseRoutes'
 import workoutRoutes from './routes/workoutRoutes'
 import workoutexerciseRoutes from './routes/workoutexerciseRoutes'
+import { limiter } from './middlewares/rateLimiter';
 const app = express();
 
 app.use(express.json());
 
+//Adds a rate limiter to limit the rate of incoming requests
+app.use(limiter);
 //Ensures API can take x-www-form-urlencoded requests
 app.use(express.urlencoded({ extended: true }));
 // Routes
