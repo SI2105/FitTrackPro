@@ -21,6 +21,12 @@ export const createWorkoutExercise = async (
       comment,
     } = req.body;
 
+
+    if(!exerciseId){
+      res.status(400).json({message: "ExerciseId not given"})
+      return;      
+    }
+
     const workout = await prisma.workout.findUnique({
       where: { id: parseInt(workoutId) },
     });
@@ -51,26 +57,23 @@ export const createWorkoutExercise = async (
       return;
     }
 
-    // Validate based on category
-    const errors: string[] = [];
+ 
 
     if (exercise.category === ExerciseCategory.strength) {
       if (sets == null || reps == null || weight == null) {
-        errors.push("Strength exercises must include sets, reps, and weight.");
+        res.status(400).json({ message: "Strength exercises must include sets, reps, and weight." });
+        return;
       }
     } else if (exercise.category === ExerciseCategory.aerobic) {
       if (duration == null && distance == null) {
-        errors.push("Aerobic exercises must include duration or distance.");
+        res.status(400).json({ message: "Aerobic exercises must include duration or distance." });
+        return;
       }
     } else if (exercise.category === ExerciseCategory.flexibility) {
       if (sets == null || reps == null) {
-        errors.push("Flexibility exercises must include sets and reps.");
+        res.status(400).json({ message: "Flexibility exercises must include sets and reps." });
+        return;
       }
-    }
-
-    if (errors.length > 0) {
-      res.status(400).json({ message: "Validation failed", errors });
-      return;
     }
 
     // Create base WorkoutExercise first
