@@ -1,165 +1,128 @@
 import { Request, Response, NextFunction } from "express";
-import { PrismaClient } from "../../generated/prisma";
+import { workoutService } from "../services/workoutService"; // Adjust path as needed
 
-
-
-const prisma = new PrismaClient();
 export const createWorkout = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    try{
+    try {
         const { name, notes, scheduledAt } = req.body;
-        const userId : number|undefined = req.user_id;
+        const userId: number | undefined = req.user_id;
 
         if (!userId || !name) {
             res.status(400).json({ message: "Missing user ID or workout name" });
-            return; 
+            return;
         }
 
-        const workout = await prisma.workout.create({
-            data: {
-                name,
-                notes,
-                scheduledAt: scheduledAt ? new Date(scheduledAt) : undefined, //undefined means it wasn't scheduled but added
-                userId,
-            },
+        const workout = await workoutService.createWorkout({
+            name,
+            notes,
+            scheduledAt,
+            userId,
         });
 
         res.status(201).json(workout);
-    }
-    catch(error){
+    } catch (error) {
         next(error);
-    } 
-}
+    }
+};
 
 export const getUserWorkouts = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    try{
+    try {
         const userId = req.user_id;
         if (!userId) {
             res.status(400).json({ message: "Missing user ID" });
             return;
         }
 
-        const workouts = await prisma.workout.findMany({
-        where: { userId },
-            include: {
-                exercises: {
-                    include: {
-                        exercise: true,
-                    },
-                },
-            },
-        });
-
+        const workouts = await workoutService.getUserWorkouts(userId);
         res.status(200).json(workouts);
-        
-    }
-    catch(error){
-        next(error);
-    } 
-}
-
-
-export const getWorkoutById = async (
-    req: Request, 
-    res: Response, 
-    next: NextFunction
-
-) => {
-    
-    try{
-        const workoutId = parseInt(req.params.id);
-        const userId = req.user_id;
-
-        const workout = await prisma.workout.findFirst({
-            where: {
-                id: workoutId,
-                userId,
-            },
-            include: {
-                exercises: {
-                    include: {
-                        exercise: true,
-                    },
-                },
-            },
-        });
-
-        if (!workout) {
-        
-            res.status(404).json({ message: "Workout not found" });
-            return;
-        }
-
-        res.status(200).json(workout);
-    }
-    
-    
-    catch (error) {
-        next(error);
-    }
-};
-
-export const updateWorkout = async (req: Request, res: Response, next: NextFunction) => {
-    
-    try {
-
-        const workoutId = parseInt(req.params.id);
-        const userId = req.user_id;
-        const { name, notes, scheduledAt } = req.body;
-
-        if (!name && !notes && !scheduledAt){
-            res.status(400).json({message: "Empty Update Error: At least one field should be included in update"})
-            return;
-        }
-
-        const workout = await prisma.workout.updateManyAndReturn({
-            where: {
-                id: workoutId,
-                userId,
-            },
-            data: {
-                name,
-                notes,
-                scheduledAt: scheduledAt ? new Date(scheduledAt) : undefined,
-            },
-        });
-
-        if (workout.length === 0) {
-            res.status(404).json({ message: "Workout not found or does not belong to user" });
-            return;
-        }
-
-        res.status(200).json(workout[0]);
     } catch (error) {
         next(error);
     }
 };
 
-export const deleteWorkout = async (req: Request, res: Response, next: NextFunction) => {
+export const getWorkoutById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const workoutId = parseInt(req.params.id);
         const userId = req.user_id;
 
-        const deleted = await prisma.workout.deleteMany({
-            where: {
-                id: workoutId,
-                userId,
-            },
-        });
+        
+        if(userId){
+            const workout = await workoutService.getWorkoutById(workoutId, userId);
 
-        if (deleted.count === 0) {
-            res.status(404).json({ message: "Workout not found or does not belong to user" });
+            if (!workout) {
+                res.status(404).json({ message: "Workout not found" });
+                return;
+            }
+
+            res.status(200).json(workout);
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateWorkout = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const workoutId = parseInt(req.params.id);
+        const userId = req.user_id;
+        const { name, notes, scheduledAt } = req.body;
+
+        if (!name && !notes && !scheduledAt) {
+            res.status(400).json({ message: "Empty Update Error: At least one field should be included in update" });
             return;
         }
 
-        res.status(200).json({ message: "Workout deleted" });
+        if(userId){
+            const workout = await workoutService.updateWorkout(workoutId, userId, { name, notes, scheduledAt });
+
+            if (!workout || workout.length === 0) {
+                res.status(404).json({ message: "Workout not found or does not belong to user" });
+                return;
+            }
+
+            res.status(200).json(workout[0]);
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteWorkout = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const workoutId = parseInt(req.params.id);
+        const userId = req.user_id;
+
+        if(userId){
+            const deleted = await workoutService.deleteWorkout(workoutId, userId);
+             if (deleted.count === 0) {
+                res.status(404).json({ message: "Workout not found or does not belong to user" });
+                return;
+            }
+
+            res.status(200).json({ message: "Workout deleted" });
+        }
+        
+
+       
     } catch (error) {
         next(error);
     }
