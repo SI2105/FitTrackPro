@@ -112,13 +112,12 @@ describe('Exercise Routes', () => {
     expect(res.body[0].name).toMatch(/curl/i);
   });
 
-  it('Search exercises unsuccessfully (no query)', async () => {
+  it('Search exercises sucessfully with no query returning all exercise', async () => {
     const res = await request(app)
       .get('/api/v1/exercises/search')
       .set('Authorization', `Bearer ${token}`);
 
-    expect(res.statusCode).toBe(400);
-    expect(res.body.error).toBe('No query parameter was passed');
+    expect(res.statusCode).toBe(200);
   });
 
   it('Get exercises by valid category', async () => {

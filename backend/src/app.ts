@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 
 //Adds a rate limiter to limit the rate of incoming requests
-app.use(limiter);
+// app.use(limiter);
 //Ensures API can take x-www-form-urlencoded requests
 app.use(express.urlencoded({ extended: true }));
 // Routes
