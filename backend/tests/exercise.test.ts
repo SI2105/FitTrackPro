@@ -120,6 +120,17 @@ describe('Exercise Routes', () => {
     expect(res.statusCode).toBe(200);
   });
 
+  it('Search is case-insensitive and supports partial matches', async () => {
+  const res = await request(app)
+    .get('/api/v1/exercises/search?query=BENCH')
+    .set('Authorization', `Bearer ${token}`);
+
+  expect(res.statusCode).toBe(200);
+  //Ensures that at least one exercise matches "bench" (case-insensitive, partial)
+  expect(res.body.some((e: Exercise) => /bench/i.test(e.name))).toBe(true); 
+});
+
+
   it('Get exercises by valid category', async () => {
     const res = await request(app)
       .get('/api/v1/exercises/category/strength')
