@@ -1,13 +1,21 @@
-import { Request, Response} from 'express';
+/* eslint-disable  @typescript-eslint/no-unused-vars*/
+import { NextFunction, Request, Response} from 'express';
 
-export interface AppError extends Error {
-  status?: number;
+export class AppError extends Error {
+   status?: number;
+  constructor(status: number, message: string ){
+    super(message);
+    this.status = status;
+
+  }
+ 
 }
 
 export const errorHandler = (
   err: AppError,
   req: Request,
   res: Response,
+  next: NextFunction
 ) => {
   console.error(err);
 

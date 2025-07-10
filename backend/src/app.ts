@@ -5,7 +5,7 @@ import authRoutes from './routes/authRoutes';
 import exerciseRoutes from './routes/exerciseRoutes'
 import workoutRoutes from './routes/workoutRoutes'
 import workoutexerciseRoutes from './routes/workoutexerciseRoutes'
-import { limiter } from './middlewares/rateLimiter';
+// import { limiter } from './middlewares/rateLimiter';
 const app = express();
 
 app.use(express.json());

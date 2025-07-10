@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import { PrismaClient, ExerciseCategory } from "../../generated/prisma";
-
-const prisma = new PrismaClient();
-
+import {
+  createWorkoutExerciseService,
+  updateWorkoutExerciseService,
+  deleteWorkoutExerciseService,
+  getWorkoutExercisesService,
+  getWorkoutExerciseByIdService,
+} from "../services/workoutexerciseService";
 
 export const createWorkoutExercise = async (
   req: Request,
@@ -10,119 +13,20 @@ export const createWorkoutExercise = async (
   next: NextFunction
 ) => {
   try {
-    const { workoutId } = req.params;
-    const {
-      exerciseId,
-      sets,
-      reps,
-      weight,
-      duration,
-      distance,
-      comment,
-    } = req.body;
-
-
-    if(!exerciseId){
-      res.status(400).json({message: "ExerciseId not given"})
-      return;      
+    const userId = req.user_id;
+    const workoutId = req.params.workoutId;
+    if (userId) {
+      const result = await createWorkoutExerciseService(
+        userId,
+        workoutId,
+        req.body
+      );
+      res.status(201).json(result);
     }
-
-    const workout = await prisma.workout.findUnique({
-      where: { id: parseInt(workoutId) },
-    });
-
-    if (!workout || workout.userId !== req.user_id) {
-      res.status(403).json({ message: "Unauthorized or workout not found" });
-      return;
-    }
-
-    const exercise = await prisma.exercise.findUnique({
-      where: { id: exerciseId },
-    });
-
-    if (!exercise) {
-      res.status(404).json({ message: "Exercise not found" });
-      return;
-    }
-
-    // Check duplicate
-    const existing = await prisma.workoutExercise.findUnique({
-      where: { workoutId_exerciseId: { workoutId: parseInt(workoutId), exerciseId } },
-    });
-
-    if (existing) {
-      res.status(400).json({
-        message: "This exercise is already in the workout. Edit or remove it instead.",
-      });
-      return;
-    }
-
- 
-
-    if (exercise.category === ExerciseCategory.strength) {
-      if (sets == null || reps == null || weight == null) {
-        res.status(400).json({ message: "Strength exercises must include sets, reps, and weight." });
-        return;
-      }
-    } else if (exercise.category === ExerciseCategory.aerobic) {
-      if (duration == null && distance == null) {
-        res.status(400).json({ message: "Aerobic exercises must include duration or distance." });
-        return;
-      }
-    } else if (exercise.category === ExerciseCategory.flexibility) {
-      if (sets == null || reps == null) {
-        res.status(400).json({ message: "Flexibility exercises must include sets and reps." });
-        return;
-      }
-    }
-
-    // Create base WorkoutExercise first
-    const base = await prisma.workoutExercise.create({
-      data: {
-        workoutId: parseInt(workoutId),
-        exerciseId,
-        comment,
-      },
-    });
-
-    // Then create the subtype
-    switch (exercise.category) {
-      case ExerciseCategory.strength:
-        await prisma.strengthWorkoutExercise.create({
-          data: {
-            id: base.id,
-            sets,
-            reps,
-            weight,
-          },
-        });
-        break;
-      case ExerciseCategory.flexibility:
-        await prisma.flexibilityWorkoutExercise.create({
-          data: {
-            id: base.id,
-            sets,
-            reps,
-          },
-        });
-        break;
-      case ExerciseCategory.aerobic:
-        await prisma.aerobicWorkoutExercise.create({
-          data: {
-            id: base.id,
-            duration: duration ?? 0,
-            distance: distance ?? 0,
-          },
-        });
-        break;
-    }
-
-    res.status(201).json({ ...base, category: exercise.category });
   } catch (error) {
     next(error);
   }
 };
-
 
 export const updateWorkoutExercise = async (
   req: Request,
@@ -130,90 +34,30 @@ export const updateWorkoutExercise = async (
   next: NextFunction
 ) => {
   try {
-    const { workoutId, id } = req.params;
-    const {
-      sets,
-      reps,
-      weight,
-      duration,
-      distance,
-      comment,
-    } = req.body;
-
-    const workout = await prisma.workout.findUnique({
-      where: { id: parseInt(workoutId) },
-    });
-
-    if (!workout || workout.userId !== req.user_id) {
-      res.status(403).json({ message: "Unauthorized or workout not found" });
-      return;
-    }
-
-    const base = await prisma.workoutExercise.findUnique({
-      where: { id: parseInt(id) },
-      include: { exercise: true },
-    });
-
-    if (!base) {
-      res.status(404).json({ message: "WorkoutExercise not found" });
-      return;
-    }
-
-    const { category } = base.exercise;
-    const errors: string[] = [];
-
-    if (category === ExerciseCategory.strength) {
-      if (sets == null || reps == null || weight == null) {
-        errors.push("Strength exercises must include sets, reps, and weight.");
+    const userId = req.user_id;
+    const workoutId = req.params.workoutId;
+    const id = req.params.id;
+    if(userId){
+      const workoutExercise = await getWorkoutExerciseByIdService(userId, workoutId, id);
+      if (Object.keys(workoutExercise).length === 0) {
+        res.status(404).json({ message: "WorkoutExercise not found" });
+        return;
       }
-    } else if (category === ExerciseCategory.aerobic) {
-      if (duration == null && distance == null) {
-        errors.push("Aerobic exercises must include duration or distance.");
-      }
-    } else if (category === ExerciseCategory.flexibility) {
-      if (sets == null || reps == null) {
-        errors.push("Flexibility exercises must include sets and reps.");
+      if (userId) {
+        const result = await updateWorkoutExerciseService(
+          userId,
+          workoutId,
+          id,
+          req.body
+        );
+        res.status(200).json(result);
       }
     }
-
-    if (errors.length > 0) {
-      res.status(400).json({ message: "Validation failed", errors });
-      return;
-    }
-
-    // Update base
-    await prisma.workoutExercise.update({
-      where: { id: parseInt(id) },
-      data: { comment },
-    });
-
-    // Update subtype
-    if (category === ExerciseCategory.strength) {
-      await prisma.strengthWorkoutExercise.update({
-        where: { id: parseInt(id) },
-        data: { sets, reps, weight },
-      });
-    } else if (category === ExerciseCategory.flexibility) {
-      await prisma.flexibilityWorkoutExercise.update({
-        where: { id: parseInt(id) },
-        data: { sets, reps },
-      });
-    } else if (category === ExerciseCategory.aerobic) {
-      await prisma.aerobicWorkoutExercise.update({
-        where: { id: parseInt(id) },
-        data: {
-          duration: duration ?? 0,
-          distance: distance ?? 0,
-        },
-      });
-    }
-
-    res.status(200).json({ message: "WorkoutExercise updated." });
+    
   } catch (error) {
     next(error);
   }
 };
-
 
 export const deleteWorkoutExercise = async (
   req: Request,
@@ -221,22 +65,17 @@ export const deleteWorkoutExercise = async (
   next: NextFunction
 ) => {
   try {
-    const { workoutId, id } = req.params;
-
-    const workout = await prisma.workout.findUnique({
-      where: { id: parseInt(workoutId) },
-    });
-
-    if (!workout || workout.userId !== req.user_id) {
-      res.status(403).json({ message: "Unauthorized or workout not found" });
-      return;
+    const userId = req.user_id;
+    const workoutId = req.params.workoutId;
+    const id = req.params.id;
+    if (userId) {
+      await deleteWorkoutExerciseService(
+        userId,
+        workoutId,
+        id
+      );
+      res.status(204).send();
     }
-
-    await prisma.workoutExercise.delete({
-      where: { id: parseInt(id) },
-    });
-
-    res.status(204).send();
   } catch (error) {
     next(error);
   }
@@ -248,64 +87,16 @@ export const getWorkoutExercises = async (
   next: NextFunction
 ) => {
   try {
-    const { workoutId } = req.params;
-
-    const workout = await prisma.workout.findUnique({
-      where: { id: parseInt(workoutId) },
-    });
-
-    if (!workout || workout.userId !== req.user_id) {
-      res.status(403).json({ message: "Unauthorized or workout not found" });
-      return;
-    }
-
-    const workoutExercises = await prisma.workoutExercise.findMany({
-      where: { workoutId: parseInt(workoutId) },
-      include: {
-        exercise: true,
-        strength: true,
-        aerobic: true,
-        flexibility: true,
-      },
-    });
-
-    const simplified = workoutExercises.map((we) => {
-      let details: Record<string, unknown> = {
-        id: we.id,
-        comment: we.comment,
-        exercise: {
-          id: we.exercise.id,
-          name: we.exercise.name,
-          category: we.exercise.category,
-        },
-      };
-
-      if (we.strength) {
-        details = {
-          ...details,
-          sets: we.strength.sets,
-          reps: we.strength.reps,
-          weight: we.strength.weight,
-        };
-      } else if (we.aerobic) {
-        details = {
-          ...details,
-          duration: we.aerobic.duration,
-          distance: we.aerobic.distance,
-        };
-      } else if (we.flexibility) {
-        details = {
-          ...details,
-          sets: we.flexibility.sets,
-          reps: we.flexibility.reps,
-        };
-      }
-
-      return details;
-    });
-
-    res.status(200).json(simplified);
+    const userId = req.user_id;
+    const workoutId = req.params.workoutId;
+    if(userId){
+      const result = await getWorkoutExercisesService(
+        userId,
+        workoutId
+      );
+      res.status(200).json(result);
+  }
   } catch (error) {
-    next(error);
+      next(error);
   }
 };
