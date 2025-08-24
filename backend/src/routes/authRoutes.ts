@@ -18,7 +18,10 @@
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               name:
  *                 type: string
  *               password:
  *                 type: string
@@ -42,8 +45,9 @@
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               email:
  *                 type: string
+ *                 format: email
  *               password:
  *                 type: string
  *     responses:

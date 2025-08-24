@@ -12,6 +12,12 @@ const options = {
       title: 'FitTrackPro',
       version: '1.0.0',
     },
+    servers: [
+      {
+      url: 'http://localhost:' + config.port + '/api/v1',
+      description: 'Development server',
+      },
+    ],
   },
   apis: ['./src/routes/*.ts'],
 };
