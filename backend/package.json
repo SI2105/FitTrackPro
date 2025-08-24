@@ -41,6 +41,8 @@
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "express-rate-limit": "^7.5.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   }
 }

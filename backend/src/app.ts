@@ -1,4 +1,4 @@
-import express from 'express';
+ import express from 'express';
 import { errorHandler } from './middlewares/errorHandler';
 import authRoutes from './routes/authRoutes';
 
@@ -6,6 +6,7 @@ import exerciseRoutes from './routes/exerciseRoutes'
 import workoutRoutes from './routes/workoutRoutes'
 import workoutexerciseRoutes from './routes/workoutexerciseRoutes'
 // import { limiter } from './middlewares/rateLimiter';
+// import bodyParser from 'body-parser';
 const app = express();
 
 app.use(express.json());
