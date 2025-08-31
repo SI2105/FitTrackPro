@@ -30,6 +30,8 @@
  *         description: User registered successfully
  *       400:
  *         description: Invalid input or user already exists
+ *       409:
+ *         description: Account with the supplied email already exists
  */
 
 /**
@@ -53,6 +55,8 @@
  *     responses:
  *       200:
  *         description: Login successful, returns authentication token
+ *       400:
+ *         description: Invalid input or fields are missing
  *       401:
  *         description: Invalid credentials
  */
