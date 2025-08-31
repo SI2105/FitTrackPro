@@ -108,6 +108,8 @@ async function main() {
   },
   ];
 
+  await prisma.$queryRaw`ALTER Sequence "Exercise_id_seq" RESTART WITH 1`
+  
   for (const exercise of exercises) {
     await prisma.exercise.upsert({
       where: { name: exercise.name },
