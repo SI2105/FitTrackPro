@@ -108,6 +108,8 @@ async function main() {
   },
   ];
 
+  //Delete all existing exercises before seeding new ones
+  await prisma.exercise.deleteMany();
   await prisma.$queryRaw`ALTER Sequence "Exercise_id_seq" RESTART WITH 1`
   
   for (const exercise of exercises) {
