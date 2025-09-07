@@ -1,3 +1,12 @@
+
+
+/**
+ * @swagger
+ * tags:
+ *   name: Workouts
+ *   description: API endpoints for managing and retrieving workouts for authenticated users.
+ */
+
 /**
  * @swagger
  * /workouts:

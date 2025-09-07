@@ -89,6 +89,7 @@ export const getWorkoutExercises = async (
   try {
     const userId = req.user_id;
     const workoutId = req.params.workoutId;
+    
     if(userId){
       const result = await getWorkoutExercisesService(
         userId,

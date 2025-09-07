@@ -1,3 +1,11 @@
+
+/**
+ * @swagger
+ * tags:
+ *   name: WorkoutExercises
+ *   description: API endpoints for managing and retrieving exercises associated with specific workouts for authenticated users.
+ */
+
 /**
  * @swagger
  * /workoutexercises/{workoutId}/exercises:
@@ -60,8 +68,8 @@
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/WorkoutExercise'
- *       401:
- *         description: Unauthorized.
+ *       403:
+ *         description: Unauthorized or workout not found
  */
 
 /**

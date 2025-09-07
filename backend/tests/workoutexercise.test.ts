@@ -90,6 +90,7 @@ describe('WorkoutExercise API', () => {
     
     workoutExerciseId = res.body.id;
   });
+  
 
   it('Add a strength exercise to the workout unsuccessfully(No sets, reps, weight)', async () => {
     const res = await request(app)
@@ -101,6 +102,26 @@ describe('WorkoutExercise API', () => {
       });
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toContain('Flexibility exercises must include sets and reps.');
+  });
+
+  it('Unsuccessfully add a strength exercise to a workout that does not exist ', async () => {
+    const res = await request(app)
+      .post(`/api/v1/workoutexercises/-1/exercises`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        exerciseId: strengthExerciseId,
+        sets: 4,
+        reps: 10,
+        weight: 100,
+        comment: 'Warm-up',
+      });
+
+    console.log(res.body.errors)
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toHaveProperty('id');
+    expect(res.body.category).toBe('strength');
+    
+    workoutExerciseId = res.body.id;
   });
 
   it('should fetch all exercises in the workout', async () => {
@@ -136,6 +157,7 @@ describe('WorkoutExercise API', () => {
 
     expect(res.statusCode).toBe(204);
   });
+
 
   it('should return 404 when updating non-existent workoutExercise', async () => {
     const res = await request(app)
