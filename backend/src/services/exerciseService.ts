@@ -1,4 +1,21 @@
-import { ExerciseCategory, MuscleGroup, PrismaClient } from "../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
+
+// Enum definitions from schema
+export enum ExerciseCategory {
+  strength = "strength",
+  aerobic = "aerobic", 
+  flexibility = "flexibility"
+}
+
+export enum MuscleGroup {
+  chest = "chest",
+  back = "back",
+  legs = "legs", 
+  arms = "arms",
+  shoulders = "shoulders",
+  core = "core",
+  glutes = "glutes"
+}
 
 const prisma = new PrismaClient();
 

@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../src/app';
-import { PrismaClient, ExerciseCategory } from '../generated/prisma';
+import { PrismaClient } from '../generated/prisma';
 
 const prisma = new PrismaClient();
 let token: string;

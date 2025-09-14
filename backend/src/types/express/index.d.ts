@@ -1,5 +1,5 @@
 // src/types/express/index.d.ts
-import {  Exercise } from '../../../generated/prisma'
+import { Exercise } from '@prisma/client'
 
 export type StrengthExercise = Omit<Exercise, 'Duration' | 'Distance'> & { type: 'strength' }
 export type AerobicExercise = Omit<Exercise, 'Sets' | 'Reps' | 'Weight'> & { type: 'aerobic' }

@@ -1,4 +1,11 @@
-import { PrismaClient, ExerciseCategory } from "../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
+
+// Enum definitions from schema  
+export enum ExerciseCategory {
+  strength = "strength",
+  aerobic = "aerobic", 
+  flexibility = "flexibility"
+}
 import { AppError } from "../middlewares/errorHandler";
 const prisma = new PrismaClient();
 

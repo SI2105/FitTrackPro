@@ -1,6 +1,31 @@
 import request from 'supertest';
 import app from '../src/app';
-import { PrismaClient, ExerciseCategory, MuscleGroup, Exercise } from '../generated/prisma';
+import { PrismaClient } from '@prisma/client';
+
+// Enum definitions from schema
+export enum ExerciseCategory {
+  strength = "strength",
+  aerobic = "aerobic", 
+  flexibility = "flexibility"
+}
+
+export enum MuscleGroup {
+  chest = "chest",
+  back = "back",
+  legs = "legs", 
+  arms = "arms",
+  shoulders = "shoulders",
+  core = "core",
+  glutes = "glutes"
+}
+
+export interface Exercise {
+  id: number;
+  name: string;
+  description: string;
+  category: ExerciseCategory;
+  muscleGroups: MuscleGroup[];
+}
 
 const prisma = new PrismaClient();
 let token: string;
