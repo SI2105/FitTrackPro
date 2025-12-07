@@ -12,7 +12,7 @@ export default function AddExercisePage({ params }: { params: { id: string } }) 
   const workoutId = use(params).id; /* This is to avoid accessing params.id directly which is being deprecated, currently TS compiler does not handle this well */
   const [exercises, setExercises] = useState<any[]>([]);
   const [selectedExerciseId, setSelectedExerciseId] = useState('');
-  const [category, setCategory] = useState('strength');
+  const [category, setCategory] = useState('');
   const [form, setForm] = useState({ sets: '', reps: '', weight: '', duration: '', distance: '', comment: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,9 +33,22 @@ export default function AddExercisePage({ params }: { params: { id: string } }) 
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCategory(e.target.value);
+  const handleExerciseSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    setSelectedExerciseId(val);
+    // reset form when exercise changes
     setForm({ sets: '', reps: '', weight: '', duration: '', distance: '', comment: '' });
+    if (!val) {
+      setCategory('');
+      return;
+    }
+    const id = Number(val);
+    const found = exercises.find((ex: any) => ex.id === id || String(ex.id) === val);
+    if (found && found.category) {
+      setCategory(found.category);
+    } else {
+      setCategory('');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,7 +59,9 @@ export default function AddExercisePage({ params }: { params: { id: string } }) 
       const payload: any = {
         exerciseId: parseInt(selectedExerciseId),
       };
-      // Only add fields that are filled and relevant
+  // Add category derived from selected exercise
+  if (category) payload.category = category;
+  // Only add fields that are filled and relevant
       if (form.sets) payload.sets = Number(form.sets);
       if (form.reps) payload.reps = Number(form.reps);
       if (form.weight) payload.weight = Number(form.weight);
@@ -75,7 +90,7 @@ export default function AddExercisePage({ params }: { params: { id: string } }) 
           <select
             name="exerciseId"
             value={selectedExerciseId}
-            onChange={e => setSelectedExerciseId(e.target.value)}
+            onChange={handleExerciseSelect}
             required
             className="w-full border rounded px-3 py-2"
           >
@@ -87,16 +102,7 @@ export default function AddExercisePage({ params }: { params: { id: string } }) 
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-          <select
-            name="category"
-            value={category}
-            onChange={handleCategoryChange}
-            className="w-full border rounded px-3 py-2"
-          >
-            <option value="strength">Strength</option>
-            <option value="aerobic">Aerobic</option>
-            <option value="flexibility">Flexibility</option>
-          </select>
+          <div className="w-full border rounded px-3 py-2 text-gray-700">{category ? capitaliseFirstChar(category) : 'Select an exercise to determine category'}</div>
         </div>
         {category === 'strength' && (
           <div className="grid grid-cols-3 gap-4">
@@ -153,4 +159,9 @@ export default function AddExercisePage({ params }: { params: { id: string } }) 
       </form>
     </div>
   );
+}
+
+function capitaliseFirstChar(string: String){
+  return string.charAt(0).toUpperCase() + string.slice(1)
+  
 }
