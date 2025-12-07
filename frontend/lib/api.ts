@@ -99,10 +99,11 @@ export const workoutsApi = {
 
 // Workout Exercises API
 export const workoutExercisesApi = {
-  create: async (workoutExercise: Partial<WorkoutExercise>): Promise<WorkoutExercise> => {
-    const response = await api.post('/workoutexercises', workoutExercise);
+  create: async (id: number, workoutExercise: Partial<WorkoutExercise>): Promise<WorkoutExercise> => {
+    const response = await api.post(`/workoutexercises/${id}/exercises`, workoutExercise);
     return response.data;
   },
+  
 
   update: async (id: number, workoutExercise: Partial<WorkoutExercise>): Promise<WorkoutExercise> => {
     const response = await api.put(`/workoutexercises/${id}`, workoutExercise);

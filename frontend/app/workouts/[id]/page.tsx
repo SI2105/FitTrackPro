@@ -200,9 +200,15 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium text-gray-900">Exercises</h2>
-              <button className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <Plus className="h-4 w-4 mr-1" />
-                Add Exercise
+              <button className="">
+                <Link
+                    href={`/workouts/${workout.id}/add-exercise`}
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                  Add Exercise
+                    </Link>
+                
               </button>
             </div>
 
@@ -285,10 +291,13 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
                   Add exercises to build your workout plan.
                 </p>
                 <div className="mt-6">
-                  <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                    <Link
+                    href={`/workouts/${workout.id}/add-exercise`}
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                    >
                     <Plus className="h-4 w-4 mr-2" />
                     Add First Exercise
-                  </button>
+                    </Link>
                 </div>
               </div>
             )}
