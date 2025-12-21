@@ -11,10 +11,15 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && token) {
+    if (isLoading) return;
+
+    if (token) {
       router.push('/dashboard');
+    } else {
+      router.push('/auth/login');
     }
   }, [token, isLoading, router]);
+
 
   if (isLoading) {
     return (

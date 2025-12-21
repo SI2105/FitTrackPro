@@ -15,27 +15,14 @@ export function withAuth<P extends object>(
   return function ProtectedComponent(props: P) {
     const { token, isLoading, validateToken, logout } = useAuth();
     const router = useRouter();
-    const intervalInMinutes = 5 //in minutes
+    const intervalInMinutes = 30 //in minutes
     useEffect(() => {
       if (!isLoading && !token) {
         router.push('/auth/login');
       }
     }, [token, isLoading, router]);
 
-    useEffect(() => {
-      if (!token) return;
-
-      // Validate token periodically (every 5 minutes)
-      const tokenRefreshInterval = setInterval(async () => {
-        const isValid = await validateToken();
-        if (!isValid) {
-          logout();
-          router.push('/auth/login');
-        }
-      }, intervalInMinutes * 60 * 1000); // 5 minutes
-
-      return () => clearInterval(tokenRefreshInterval);
-    }, [token, validateToken, logout, router]);
+ 
 
     if (isLoading) {
       return (
