@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { User } from '@/types';
 
@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (token: string) => void;
   logout: () => void;
   isLoading: boolean;
+  validateToken: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,16 +20,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for existing token on mount
+  const validateToken = useCallback(async (): Promise<boolean> => {
     const savedToken = Cookies.get('token');
-    if (savedToken) {
-      setToken(savedToken);
-      // In a real app, you'd decode the JWT or make an API call to get user info
-      // For now, we'll just set the token
+    if (!savedToken) {
+      return false;
     }
-    setIsLoading(false);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/v1/auth/verify`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${savedToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        return true;
+      } else if (response.status === 401) {
+        // Token is invalid or expired
+        clearAuth();
+        return false;
+      }
+      return false;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return false;
+    }
   }, []);
+
+  const clearAuth = useCallback(() => {
+    setToken(null);
+    setUser(null);
+    Cookies.remove('token');
+  }, []);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const savedToken = Cookies.get('token');
+      if (savedToken) {
+        setToken(savedToken);
+        // Validate the token
+        const isValid = await validateToken();
+        if (!isValid) {
+          clearAuth();
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initAuth();
+  }, [validateToken, clearAuth]);
 
   const login = (token: string) => {
     setToken(token);
@@ -37,13 +79,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    setToken(null);
-    setUser(null);
-    Cookies.remove('token');
+    clearAuth();
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isLoading, validateToken }}>
       {children}
     </AuthContext.Provider>
   );

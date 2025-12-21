@@ -28,6 +28,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle 401 responses - token is invalid/expired
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear the invalid token
+      Cookies.remove('token');
+      // Redirect to login page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Auth API
 export const authApi = {
   register: async (email: string, name: string, password: string): Promise<{ message: string }> => {

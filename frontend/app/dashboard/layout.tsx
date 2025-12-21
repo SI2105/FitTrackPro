@@ -18,7 +18,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { token, logout, isLoading } = useAuth();
+  const { token, logout, isLoading, validateToken } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -26,6 +26,21 @@ export default function DashboardLayout({
       router.push('/auth/login');
     }
   }, [token, isLoading, router]);
+
+  // Validate token periodically (every 5 minutes)
+  useEffect(() => {
+    if (!token) return;
+
+    const interval = setInterval(async () => {
+      const isValid = await validateToken();
+      if (!isValid) {
+        logout();
+        router.push('/auth/login');
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, [token, validateToken, logout, router]);
 
   if (isLoading) {
     return (
