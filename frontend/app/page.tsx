@@ -16,6 +16,8 @@ export default function Home() {
     }
   }, [token, isLoading, router]);
 
+
+  //Logic needs to go here to handle expired tokens, this case needs to be sent to login. Research(https://dev.to/egnoel/how-to-verify-jwt-token-expiry-in-reactnext-22dn)
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
