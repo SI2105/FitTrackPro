@@ -82,3 +82,20 @@ export const loginUser = async (
     next(error);
   }
 };
+
+export const getCurrentUser = async (req: Request, res: Response) => {
+  try {
+    
+    
+    res.json({
+      user: {
+        id: req.user_id,
+        email: req.email,
+        name: req.name,
+        // Add other user fields you need
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch user' });
+  }
+};

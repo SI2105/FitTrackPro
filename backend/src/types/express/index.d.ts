@@ -10,7 +10,9 @@ export{};
 declare global {
   namespace Express {
     export interface Request {
-      user_id?: number
+      user_id?: number,
+      email?: string,
+      name?: string,
     }
   }
 }
