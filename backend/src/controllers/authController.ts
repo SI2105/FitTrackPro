@@ -74,7 +74,7 @@ export const loginUser = async (
       return;
     }
    
-    const token = jwt.sign({ user_id: user.id }, config.secret, {
+    const token = jwt.sign({ user_id: user.id, email: user.email, createdAt: user.createdAt, updatedAt: user.updatedAt, name: user.name}, config.secret, {
     expiresIn: '1h',
     });
     res.status(200).json({ token });
@@ -89,11 +89,11 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     
     res.json({
       user: {
-        id: req.user.id,
-        email: req.user.email,
-        name: req.user.name,
-        createdAt:req.user.createdAt,
-        updatedAt:req.user.updatedAt,
+        id: req.id,
+        email: req.email,
+        name: req.name,
+        createdAt:req.createdAt,
+        updatedAt:req.updatedAt,
         
       }
     });

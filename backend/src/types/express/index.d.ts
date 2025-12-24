@@ -7,10 +7,15 @@ export type FlexibilityExercise = Omit<Exercise, 'Sets' | 'Reps' > & { type: 'fl
 
 export{};
 
+
 declare global {
   namespace Express {
     export interface Request {
-      user: User,
+      name: string;
+      id: number;
+      email: string;
+      createdAt: Date;
+      updatedAt: Date;
     }
   }
 }

@@ -3,6 +3,8 @@
 import { NextFunction, Request, Response } from "express";
 import config from "../config/config";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { User } from "../../generated/prisma";
+import { decode } from "punycode";
 
 
 export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
@@ -19,7 +21,11 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     
         const decoded = jwt.verify(token, config.secret) as JwtPayload;
 
-        req.user.id = decoded.user_id;
+        req.id = decoded.user_id
+        req.name = decoded.name
+        req.email = decoded.email
+        req.createdAt = decoded.createdAt
+        req.updatedAt = decoded.updatedAt
 
       
         next();
