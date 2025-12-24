@@ -2,10 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { User } from '@/types';
+import { UserResponse } from '@/types';
+import { authApi } from './api';
+
 
 interface AuthContextType {
-  user: User | null;
+  user: UserResponse | null;
   token: string | null;
   login: (token: string) => void;
   logout: () => void;
@@ -15,7 +17,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserResponse | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -24,16 +26,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const savedToken = Cookies.get('token');
     if (savedToken) {
       setToken(savedToken);
-      // In a real app, you'd decode the JWT or make an API call to get user info
-      // For now, we'll just set the token
     }
     setIsLoading(false);
   }, []);
 
-  const login = (token: string) => {
+  const login = async(token: string) => {
     setToken(token);
-    Cookies.set('token', token, { expires: 7 }); // 7 days
-    // In a real app, you'd decode the JWT to get user info or make an API call
+    
+    Cookies.set('token', token, { expires: 1 }); 
+
+    const User = await authApi.me()
+    setUser(User)
   };
 
   const logout = () => {

@@ -63,6 +63,15 @@ export interface AuthResponse {
   token: string;
 }
 
+export interface UserResponse{
+  name: string;
+  id: number;
+  email: string;
+  createdAt: Date;
+  updatedAt: Date;
+  
+}
+
 export interface ApiError {
   message: string;
   error?: string;

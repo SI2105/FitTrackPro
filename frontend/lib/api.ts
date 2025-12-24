@@ -6,8 +6,11 @@ import type {
   WorkoutExercise,
   AuthResponse,
   ExerciseCategory,
-  MuscleGroup 
+  MuscleGroup, 
+  UserResponse
 } from '@/types';
+import { email } from 'zod';
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -27,6 +30,44 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+//source: https://dev.to/shieldstring/how-to-use-axios-interceptors-to-handle-api-error-responses-2gn1
+//modified to handle token 
+api.interceptors.response.use(
+  (response) => {
+    // If the response is successful (status code 2xx), return the response data
+    return response;
+  },
+  (error) => {
+    // Handle errors globally
+    if (error.response) {
+      // Server responded with a status code out of 2xx range
+      const statusCode = error.response.status;
+      const errorMessage = error.response.data.message || 'An error occurred';
+
+      // Handle different status codes accordingly
+      if (statusCode === 403) {
+         // Clear token from cookies
+        Cookies.remove('token');
+        
+        window.location.href = '/auth/login'
+        
+      } 
+       else {
+        // Handle other types of errors
+        console.log(`Error ${statusCode}: ${errorMessage}`);
+      }
+    } else if (error.request) {
+      // No response received (network error, timeout, etc.)
+      console.log('Network error - check your internet connection');
+    } else {
+      // Something else happened during the request
+      console.log('Request error:', error.message);
+    }
+
+    // Optionally, return a rejected promise to ensure `.catch` is triggered in individual requests
+    return Promise.reject(error);
+  }
+);
 
 // Auth API
 export const authApi = {
@@ -39,6 +80,11 @@ export const authApi = {
     const response = await api.post('/login', { email, password });
     return response.data;
   },
+
+  me: async (): Promise<UserResponse> =>{
+    const response = await api.post('/me')
+    return response.data;
+  } 
 };
 
 // Exercises API
