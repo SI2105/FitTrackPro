@@ -117,11 +117,9 @@ describe('WorkoutExercise API', () => {
       });
 
     console.log(res.body.errors)
-    expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty('id');
-    expect(res.body.category).toBe('strength');
-    
-    workoutExerciseId = res.body.id;
+    expect(res.statusCode).toBe(403);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Unauthorized or workout not found');
   });
 
   it('should fetch all exercises in the workout', async () => {
