@@ -13,7 +13,7 @@ export const createWorkoutExercise = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.user_id;
+    const userId = req.user.id;
     const workoutId = req.params.workoutId;
     if (userId) {
       const result = await createWorkoutExerciseService(
@@ -34,7 +34,7 @@ export const updateWorkoutExercise = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.user_id;
+    const userId = req.user.id;
     const workoutId = req.params.workoutId;
     const id = req.params.id;
     if(userId){
@@ -65,7 +65,7 @@ export const deleteWorkoutExercise = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.user_id;
+    const userId = req.user.id;
     const workoutId = req.params.workoutId;
     const id = req.params.id;
     if (userId) {
@@ -87,7 +87,7 @@ export const getWorkoutExercises = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.user_id;
+    const userId = req.user.id;
     const workoutId = req.params.workoutId;
     
     if(userId){

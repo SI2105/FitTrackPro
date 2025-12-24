@@ -19,7 +19,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     
         const decoded = jwt.verify(token, config.secret) as JwtPayload;
 
-        req.user_id = decoded.user_id;
+        req.user.id = decoded.user_id;
 
       
         next();

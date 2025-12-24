@@ -1,5 +1,5 @@
 // src/types/express/index.d.ts
-import {  Exercise } from '../../../generated/prisma'
+import {  Exercise, User } from '../../../generated/prisma'
 
 export type StrengthExercise = Omit<Exercise, 'Duration' | 'Distance'> & { type: 'strength' }
 export type AerobicExercise = Omit<Exercise, 'Sets' | 'Reps' | 'Weight'> & { type: 'aerobic' }
@@ -10,9 +10,7 @@ export{};
 declare global {
   namespace Express {
     export interface Request {
-      user_id?: number,
-      email?: string,
-      name?: string,
+      user: User,
     }
   }
 }

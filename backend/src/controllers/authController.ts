@@ -89,10 +89,12 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     
     res.json({
       user: {
-        id: req.user_id,
-        email: req.email,
-        name: req.name,
-        // Add other user fields you need
+        id: req.user.id,
+        email: req.user.email,
+        name: req.user.name,
+        createdAt:req.user.createdAt,
+        updatedAt:req.user.updatedAt,
+        
       }
     });
   } catch (error) {

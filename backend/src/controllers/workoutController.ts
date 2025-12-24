@@ -8,7 +8,7 @@ export const createWorkout = async (
 ) => {
     try {
         const { name, notes, scheduledAt } = req.body;
-        const userId: number | undefined = req.user_id;
+        const userId: number | undefined = req.user.id;
 
         if (!userId || !name) {
             res.status(400).json({ message: "Missing user ID or workout name" });
@@ -34,7 +34,7 @@ export const getUserWorkouts = async (
     next: NextFunction
 ) => {
     try {
-        const userId = req.user_id;
+        const userId = req.user.id;
         if (!userId) {
             res.status(400).json({ message: "Missing user ID" });
             return;
@@ -54,7 +54,7 @@ export const getWorkoutById = async (
 ) => {
     try {
         const workoutId = parseInt(req.params.id);
-        const userId = req.user_id;
+        const userId = req.user.id;
 
         
         if(userId){
@@ -79,7 +79,7 @@ export const updateWorkout = async (
 ) => {
     try {
         const workoutId = parseInt(req.params.id);
-        const userId = req.user_id;
+        const userId = req.user.id;
         const { name, notes, scheduledAt } = req.body;
 
         if (!name && !notes && !scheduledAt) {
@@ -109,7 +109,7 @@ export const deleteWorkout = async (
 ) => {
     try {
         const workoutId = parseInt(req.params.id);
-        const userId = req.user_id;
+        const userId = req.user.id;
 
         if(userId){
             const deleted = await workoutService.deleteWorkout(workoutId, userId);
