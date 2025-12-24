@@ -15,7 +15,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
         const token = header && header.split(' ')[1];
         
         if (!token){
-            res.status(401).json({ error: 'Access denied' });
+            res.status(403).json({ error: 'Access denied' });
             return;
         } 
     
@@ -34,12 +34,12 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
             if (error.name === "TokenExpiredError") {
                 
-                res.status(401).json({ error: "Token expired" });
+                res.status(403).json({ error: "Token expired" });
                 return;
             }
 
             else if (error.name === "JsonWebTokenError"){
-                res.status(401).json({ error: "Invalid Token" });
+                res.status(403).json({ error: "Invalid Token" });
                 return;
             }
             

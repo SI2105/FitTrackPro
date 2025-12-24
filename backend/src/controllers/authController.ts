@@ -86,7 +86,7 @@ export const loginUser = async (
 export const getCurrentUser = async (req: Request, res: Response) => {
   try {
     
-    
+    //As it passes through the authenticate JWt middleware, req gets appended with following info
     res.json({
       user: {
         id: req.id,

@@ -81,7 +81,7 @@ describe('Exercise Routes', () => {
 
   it('Fetch all exercises unsuccessfully (no token)', async () => {
     const res = await request(app).get('/api/v1/exercises');
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(403);
   });
 
   it('Fetch exercise by ID successfully', async () => {

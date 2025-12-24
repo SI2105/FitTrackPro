@@ -72,7 +72,7 @@ describe('Workout Routes', () => {
 
   it('Fetch all workouts unsuccessfully (no token)', async () => {
     const res = await request(app).get('/api/v1/workouts');
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(403);
   });
 
   it('Fetch a specific workout successfully', async () => {
@@ -145,6 +145,6 @@ describe('Workout Routes', () => {
 
   it('Delete a workout unsuccessfully (no token)', async () => {
     const res = await request(app).delete(`/api/v1/workouts/${workoutId}`);
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(403);
   });
 });
