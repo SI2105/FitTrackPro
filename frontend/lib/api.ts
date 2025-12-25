@@ -150,6 +150,10 @@ export const workoutExercisesApi = {
     return response.data;
   },
   
+  get: async (id: number): Promise<WorkoutExercise> => {
+    const response = await api.get(`/workoutexercises/${id}/exercises`);
+    return response.data;
+  },
 
   update: async (id: number, workoutExercise: Partial<WorkoutExercise>): Promise<WorkoutExercise> => {
     const response = await api.put(`/workoutexercises/${id}`, workoutExercise);

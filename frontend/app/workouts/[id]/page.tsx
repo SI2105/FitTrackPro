@@ -171,8 +171,10 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Workout Info */}
-          <div className="bg-white shadow rounded-lg p-6">
+          
+          { workout.notes || workout.scheduledAt && 
+      
+          (<div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Workout Details</h2>
             
             {workout.notes && (
@@ -195,6 +197,7 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
               </div>
             )}
           </div>
+)}
 
           {/* Exercises */}
           <div className="bg-white shadow rounded-lg p-6">
@@ -234,30 +237,68 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
 
                           {/* Exercise Details */}
                           <div className="space-y-2">
-                            {workoutExercise.strength && (
-                              <div className="text-sm">
-                                <span className="font-medium text-gray-700">Strength: </span>
-                                <span className="text-gray-600">
-                                  {workoutExercise.strength.sets} sets × {workoutExercise.strength.reps} reps @ {workoutExercise.strength.weight}kg
-                                </span>
+                            {workoutExercise.exercise.category === 'strength' && (
+                              <div className="flex flex-row">
+                                <div className='basis-64 font-bold'>
+                                  Reps
+                                  <div className='font-normal'>
+                                    {workoutExercise.reps}
+                                  </div>
+                                </div>
+                                <div className='basis-64 font-bold'>
+                                  Sets
+                                  <div className='font-normal'>
+                                    {workoutExercise.sets}
+                                  </div>
+                                </div>
+                                <div className='basis-64 font-bold'>
+                                  Weight(Kg)
+                                  <div className='font-normal'>
+                                    {workoutExercise.weight}
+                                  </div>
+                                </div>
+                                
+                                
+                                
                               </div>
                             )}
                             
-                            {workoutExercise.aerobic && (
-                              <div className="text-sm">
-                                <span className="font-medium text-gray-700">Aerobic: </span>
-                                <span className="text-gray-600">
-                                  {Math.floor(workoutExercise.aerobic.duration / 60)}:{(workoutExercise.aerobic.duration % 60).toString().padStart(2, '0')} minutes, {workoutExercise.aerobic.distance}km
-                                </span>
+                            {workoutExercise.exercise.category === 'aerobic' && (
+                              <div className="flex flex-row">
+                               <div className='basis-64 font-bold'>
+                                  Duration(Minutes)
+                                  <div className='font-normal'>
+                                    {workoutExercise.duration}
+
+                                  </div>
+
+                                </div>
+                                <div className='basis-64 font-bold'>
+                                Distance(Km)
+                                  <div className='font-normal'>
+                                    {workoutExercise.distance}
+
+                                  </div>
+
+                                </div>
                               </div>
                             )}
                             
-                            {workoutExercise.flexibility && (
-                              <div className="text-sm">
-                                <span className="font-medium text-gray-700">Flexibility: </span>
-                                <span className="text-gray-600">
-                                  {workoutExercise.flexibility.sets} sets × {workoutExercise.flexibility.reps} reps
-                                </span>
+                            {workoutExercise.exercise.category === 'flexibility' && (
+                              <div className="flex flex-row">
+                                <div className='basis-64 font-bold'>
+                                  Reps
+                                  <div className='font-normal'>
+                                    {workoutExercise.reps}
+                                  </div>
+                                </div>
+                                <div className='basis-64 font-bold'>
+                                  Sets
+                                  <div className='font-normal'>
+                                    {workoutExercise.sets}
+                                  </div>
+                                </div>
+                                
                               </div>
                             )}
 

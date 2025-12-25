@@ -31,13 +31,13 @@ export interface Workout {
 
 export interface WorkoutExercise {
   id: number;
-  workoutId: number;
-  exerciseId: number;
-  comment?: string;
-  strength?: StrengthWorkoutExercise;
-  aerobic?: AerobicWorkoutExercise;
-  flexibility?: FlexibilityWorkoutExercise;
+  comment: string;
   exercise: Exercise;
+  sets: number;
+  reps: number;
+  weight: number;
+  duration: number; // seconds
+  distance: number; // km/miles
 }
 
 export interface StrengthWorkoutExercise {
@@ -45,6 +45,7 @@ export interface StrengthWorkoutExercise {
   sets: number;
   reps: number;
   weight: number;
+  
 }
 
 export interface FlexibilityWorkoutExercise {
