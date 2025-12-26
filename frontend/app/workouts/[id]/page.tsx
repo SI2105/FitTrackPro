@@ -172,7 +172,7 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           
-          { workout.notes || workout.scheduledAt && 
+          { (workout.notes || workout.scheduledAt) && 
       
           (<div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Workout Details</h2>

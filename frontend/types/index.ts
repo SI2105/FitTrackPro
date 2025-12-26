@@ -1,3 +1,5 @@
+import { AxiosHeaders } from "axios";
+
 export interface User {
   id: number;
   email: string;
@@ -71,6 +73,12 @@ export interface UserResponse{
   createdAt: Date;
   updatedAt: Date;
   
+}
+export interface errorResponse{
+  config: object
+  data: {message: string}
+  status: number
+  statusText: string
 }
 
 export interface ApiError {

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { workoutsApi, exercisesApi, workoutExercisesApi } from '@/lib/api';
 import Link from 'next/link';
 import { Plus, ArrowLeft } from 'lucide-react';
+import { errorResponse } from '@/types';
+import { Axios, AxiosError } from 'axios';
 
 export default function AddExercisePage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -70,8 +72,18 @@ export default function AddExercisePage({ params }: { params: { id: string } }) 
       if (form.comment) payload.comment = form.comment;
       await workoutExercisesApi.create(workoutId, payload);
       router.push(`/workouts/${workoutId}`);
-    } catch (err) {
-      setError('Failed to add exercise');
+    } catch (err: AxiosError | any) {
+
+      const errorResponse: errorResponse = err.response
+      if(errorResponse){
+        
+        //if errorresponse matches 
+         setError(`Failed to add exercise: ${errorResponse.data.message}`);
+      }
+      else{
+        setError(`Failed to add exercise`)
+      }
+      
     } finally {
       setLoading(false);
     }
